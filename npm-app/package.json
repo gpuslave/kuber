@@ -1,0 +1,13 @@
+{
+  "name": "simple-node",
+  "verison": "1.0.0",
+  "description": "Simple add",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "gpuslave",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
