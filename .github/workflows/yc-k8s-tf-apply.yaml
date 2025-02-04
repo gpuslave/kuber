@@ -5,6 +5,7 @@ on:
 
 env:
   K8S_DIR: "./k8s-cluster"
+  YC_TOKEN: ${{ secrets.SECRET_KEY }}
 
 jobs:
   terraform:
