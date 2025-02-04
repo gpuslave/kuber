@@ -4,7 +4,7 @@ on:
   workflow_dispatch 
 
 env:
-  K8S-DIR: "./k8s-cluster"
+  K8S_DIR: "./k8s-cluster"
 
 jobs:
   terraform:
@@ -20,19 +20,19 @@ jobs:
           terraform_version: "~1.10.5"
       
       - name: Terraform init&validate (with Backend)
-        working-directory: $K8S-DIR
+        working-directory: ${{ env.K8S_DIR }}
         run: |
           terraform init -backend-config "access_key=${{ secrets.ACCESS_KEY }}"  \
           -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
           terraform validate
       
       - name: Terraform plan
-        working-directory: $K8S-DIR
+        working-directory: ${{ env.K8S_DIR }}
         run: |
           terraform plan -detailed-exitcode
       
       - name: Terraform apply
-        working-directory: $K8S-DIR
+        working-directory: ${{ env.K8S_DIR }}
         run: |
           terraform apply -auto-approve
       
