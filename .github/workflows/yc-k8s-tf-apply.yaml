@@ -27,10 +27,10 @@ jobs:
           -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
           terraform validate
       
-      # - name: Terraform plan
-      #   working-directory: ${{ env.K8S_DIR }}
-      #   run: |
-      #     terraform plan
+      - name: Terraform plan
+        working-directory: ${{ env.K8S_DIR }}
+        run: |
+          terraform plan
       
       - name: Terraform apply
         working-directory: ${{ env.K8S_DIR }}
