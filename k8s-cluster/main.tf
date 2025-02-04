@@ -35,9 +35,57 @@ module "yc-vpc" {
 
   yandex_provider = var.yandex_provider
 
+  # TODO: make proper ing/eg with encapsulation
   cidr_blocks = {
     cluster_egress  = "0.0.0.0/0"
     cluster_ingress = "0.0.0.0/0"
     subnet          = "192.168.10.0/24"
+  }
+}
+
+module "k8s-cluster" {
+  source = "../tf-modules/k8s"
+
+  yandex_provider = var.yandex_provider
+
+  kuber_service_accounts = var.service_accounts.kuber
+
+  kuber_ip_range = var.kuber_ip_range
+
+  kuber_version = var.kuber_version
+
+  vpc = {
+    network_id        = module.yc-vpc.network_id
+    subnet_id         = module.yc-vpc.subnet_id
+    subnet_zone       = module.yc-vpc.subnet_zone
+    security_group_id = module.yc-vpc.security_group_id
+  }
+
+  kuber_instance_template = {
+    platform_id = "standard-v3"
+
+    network_interface = {
+      nat                = true
+      subnet_ids         = [module.yc-vpc.subnet_id]
+      security_group_ids = [module.yc-vpc.security_group_id]
+    }
+
+    resources = {
+      memory = 4
+      cores  = 2
+    }
+
+    boot_disk = {
+      type = "network-ssd"
+      size = 96
+    }
+
+    scheduling_policy = {
+      preemptible = false
+    }
+
+    container_runtime = {
+      type = "containerd"
+    }
   }
 }
