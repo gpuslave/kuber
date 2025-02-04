@@ -30,7 +30,7 @@ provider "yandex" {
   cloud_id  = var.yandex_provider.cloud_id
 }
 
-module "yc-ypc" {
+module "yc-vpc" {
   source = "../tf-modules/vpc"
 
   yandex_provider = var.yandex_provider
