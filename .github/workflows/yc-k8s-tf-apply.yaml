@@ -33,12 +33,12 @@ jobs:
       - name: Terraform plan
         working-directory: ${{ env.K8S_DIR }}
         run: |
-          terraform plan
+          terraform plan -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
       
       - name: Terraform apply
         working-directory: ${{ env.K8S_DIR }}
         run: |
-          terraform apply -auto-approve
+          terraform apply -auto-approve -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
       
 
       
