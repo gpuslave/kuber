@@ -1,4 +1,4 @@
-name: Apply Terraform k8s Cluster
+name: Destroy Terraform k8s Cluster
 
 on:
   workflow_dispatch 
