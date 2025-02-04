@@ -1,0 +1,39 @@
+name: Apply Terraform k8s Cluster
+
+on:
+  workflow_dispatch 
+
+env:
+  K8S_DIR: "./k8s-cluster"
+  YC_TOKEN: ${{ secrets.YC_TOKEN }}
+  YC_ZONE: "${{ secrets.YC_ZONE }}"
+  YC_FOLDER_ID: "${{ secrets.YC_FOLDER_ID }}"
+  YC_CLOUD_ID: "${{ secrets.YC_CLOUD_ID }}"
+
+jobs:
+  terraform:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.10.5"
+      
+      - name: Terraform init&validate (with Backend)
+        working-directory: ${{ env.K8S_DIR }}
+        run: |
+          terraform init -backend-config "access_key=${{ secrets.ACCESS_KEY }}"  \
+          -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
+          terraform validate
+      
+      - name: Terraform Destroy
+        working-directory: ${{ env.K8S_DIR }}
+        run: |
+          terraform apply -destroy -auto-approve -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
+      
+
+      
