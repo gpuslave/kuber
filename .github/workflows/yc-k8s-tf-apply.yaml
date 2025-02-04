@@ -6,6 +6,9 @@ on:
 env:
   K8S_DIR: "./k8s-cluster"
   YC_TOKEN: ${{ secrets.YC_TOKEN }}
+  YC_ZONE: "${{ secrets.YC_ZONE }}"
+  YC_FOLDER_ID: "${{ secrets.YC_FOLDER_ID }}"
+  YC_CLOUD_ID: "${{ secrets.YC_CLOUD_ID }}"
 
 jobs:
   terraform:
