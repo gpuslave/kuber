@@ -42,8 +42,8 @@ resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
     }
   }
 
-  cluster_ipv4_range = var.kuber_ip_range.cluster_range
-  service_ipv4_range = var.kuber_ip_range.service_range
+  # cluster_ipv4_range = var.kuber_ip_range.cluster_range
+  # service_ipv4_range = var.kuber_ip_range.service_range
 
   service_account_id      = var.kuber_service_accounts.resource_acc
   node_service_account_id = var.kuber_service_accounts.node_acc
