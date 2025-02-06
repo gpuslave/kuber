@@ -12,7 +12,7 @@ env:
 
 jobs:
   terraform:
-    name: "Terraform Apply"
+    name: "Terraform Plan Cluster"
     runs-on: ubuntu-latest
 
     steps:
@@ -30,10 +30,10 @@ jobs:
           -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
           terraform validate
       
-      - name: Terraform Destroy
+      - name: Terraform Plan
         working-directory: ${{ env.K8S_DIR }}
         run: |
-          terraform apply -destroy -auto-approve -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
+          terraform plan -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
       
 
       

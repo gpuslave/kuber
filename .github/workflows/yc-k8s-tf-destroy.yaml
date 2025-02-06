@@ -1,4 +1,4 @@
-name: Apply Terraform k8s Cluster
+name: Destroy Terraform k8s Cluster
 
 on:
   workflow_dispatch 
@@ -12,7 +12,7 @@ env:
 
 jobs:
   terraform:
-    name: "Terraform Apply Cluster"
+    name: "Terraform Destroy Cluster"
     runs-on: ubuntu-latest
 
     steps:
@@ -30,15 +30,10 @@ jobs:
           -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
           terraform validate
       
-      - name: Terraform plan
+      - name: Terraform Destroy
         working-directory: ${{ env.K8S_DIR }}
         run: |
-          terraform plan -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
-      
-      - name: Terraform apply
-        working-directory: ${{ env.K8S_DIR }}
-        run: |
-          terraform apply -auto-approve -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
+          terraform apply -destroy -auto-approve -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
       
 
       
