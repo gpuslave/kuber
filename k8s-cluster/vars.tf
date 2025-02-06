@@ -5,6 +5,7 @@ variable "yandex_provider" {
     cloud_id  = string
   })
   description = "YC"
+  sensitive = true
 }
 
 variable "service_accounts" {
@@ -14,6 +15,7 @@ variable "service_accounts" {
       node_acc     = string
     })
   })
+  sensitive = true
 }
 
 variable "kuber_ip_range" {
