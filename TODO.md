@@ -1,0 +1,2 @@
+- Fix security issue with privilege escalation
+- Move sensitive vars to TF_VAR_name
