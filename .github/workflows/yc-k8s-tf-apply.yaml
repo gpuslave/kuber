@@ -30,11 +30,6 @@ jobs:
           -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
           terraform validate
       
-      - name: Terraform plan
-        working-directory: ${{ env.K8S_DIR }}
-        run: |
-          terraform plan -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
-      
       - name: Terraform apply
         working-directory: ${{ env.K8S_DIR }}
         run: |
