@@ -25,6 +25,7 @@ terraform {
 }
 
 provider "yandex" {
+  token     = var.yandex_provider.token
   zone      = var.yandex_provider.zone
   folder_id = var.yandex_provider.folder_id
   cloud_id  = var.yandex_provider.cloud_id

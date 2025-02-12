@@ -1,5 +1,6 @@
 variable "yandex_provider" {
   type = object({
+    token     = string
     zone      = string
     folder_id = string
     cloud_id  = string

@@ -5,10 +5,14 @@ on:
 
 env:
   K8S_DIR: "./k8s-cluster"
-  YC_TOKEN: ${{ secrets.YC_TOKEN }}
-  YC_ZONE: "${{ secrets.YC_ZONE }}"
-  YC_FOLDER_ID: "${{ secrets.YC_FOLDER_ID }}"
-  YC_CLOUD_ID: "${{ secrets.YC_CLOUD_ID }}"
+  # TF_VAR_yandex_provider: "{\"token\":\"${{ secrets.YC_TOKEN }}\",\"zone\":\"${{ secrets.YC_ZONE }}\",\"folder_id\":\"${{ secrets.YC_FOLDER_ID }}\",\"cloud_id\":\"${{ secrets.YC_CLOUD_ID }}\"}"
+  TF_VAR_yandex_provider: '{"token":"$YC_TOKEN","zone":"$YC_ZONE","folder_id":"$YC_FOLDER_ID","cloud_id":"$YC_CLOUD_ID"}'
+
+
+  # YC_TOKEN: ${{ secrets.YC_TOKEN }}
+  # YC_ZONE: "${{ secrets.YC_ZONE }}"
+  # YC_FOLDER_ID: "${{ secrets.YC_FOLDER_ID }}"
+  # YC_CLOUD_ID: "${{ secrets.YC_CLOUD_ID }}"
 
 jobs:
   terraform:
@@ -33,7 +37,8 @@ jobs:
       - name: Terraform Plan
         working-directory: ${{ env.K8S_DIR }}
         run: |
-          terraform plan -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
+          terraform plan 
+#         terraform plan -var "yandex_provider={\"zone\":\"${YC_ZONE}\",\"folder_id\":\"${YC_FOLDER_ID}\",\"cloud_id\":\"${YC_CLOUD_ID}\"}"
       
 
       

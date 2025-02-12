@@ -1,11 +1,12 @@
 variable "yandex_provider" {
   type = object({
+    token     = string
     zone      = string
     folder_id = string
     cloud_id  = string
   })
   description = "YC"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "service_accounts" {
