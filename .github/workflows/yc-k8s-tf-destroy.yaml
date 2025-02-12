@@ -6,6 +6,8 @@ on:
 env:
   K8S_DIR: "./k8s-cluster"
   TF_VAR_yandex_provider: '{"token":"$YC_TOKEN","zone":"$YC_ZONE","folder_id":"$YC_FOLDER_ID","cloud_id":"$YC_CLOUD_ID"}'
+  TF_BACKEND_CONFIG_ACCESS: "access_key=${{ secrets.ACCESS_KEY }}" 
+  TF_BACKEND_CONFIG_KEY: "secret_key=${{ secrets.SECRET_KEY }}"
 
 jobs:
   terraform:
@@ -23,8 +25,9 @@ jobs:
       - name: Terraform init&validate (with Backend)
         working-directory: ${{ env.K8S_DIR }}
         run: |
-          terraform init -backend-config "access_key=${{ secrets.ACCESS_KEY }}"  \
-          -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
+          terraform init -backend-config=${{ env.TF_BACKEND_CONFIG_ACCESS }} \
+          -backend-config=${{ env.TF_BACKEND_CONFIG_KEY }}
+
           terraform validate
       
       - name: Terraform Destroy

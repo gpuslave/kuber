@@ -23,8 +23,9 @@ jobs:
       - name: Terraform init&validate (with Backend)
         working-directory: ${{ env.K8S_DIR }}
         run: |
-          terraform init -backend-config "access_key=${{ secrets.ACCESS_KEY }}"  \
-          -backend-config="secret_key=${{ secrets.SECRET_KEY }}"
+          terraform init -backend-config=${{ env.TF_BACKEND_CONFIG_ACCESS }} \
+          -backend-config=${{ env.TF_BACKEND_CONFIG_KEY }}
+
           terraform validate
       
       - name: Terraform Plan
