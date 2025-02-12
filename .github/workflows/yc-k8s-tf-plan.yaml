@@ -5,9 +5,6 @@ on:
 
 env:
   K8S_DIR: "./k8s-cluster"
-  TF_VAR_yandex_provider: '{"token":"$YC_TOKEN","zone":"$YC_ZONE","folder_id":"$YC_FOLDER_ID","cloud_id":"$YC_CLOUD_ID"}'
-  TF_BACKEND_CONFIG_ACCESS: "access_key=${{ secrets.ACCESS_KEY }}" 
-  TF_BACKEND_CONFIG_KEY: "secret_key=${{ secrets.SECRET_KEY }}"
 
 jobs:
   terraform:
@@ -23,14 +20,27 @@ jobs:
           terraform_version: "~1.10.5"
       
       - name: Terraform init&validate (with Backend)
+        env: 
+          TF_BACKEND_CONFIG_ACCESS: "access_key=${{ secrets.ACCESS_KEY }}" 
+          TF_BACKEND_CONFIG_KEY: "secret_key=${{ secrets.SECRET_KEY }}"
         working-directory: ${{ env.K8S_DIR }}
         run: |
           terraform init -backend-config=${{ env.TF_BACKEND_CONFIG_ACCESS }} \
           -backend-config=${{ env.TF_BACKEND_CONFIG_KEY }}
 
           terraform validate
+
+      - name: IAM Token
+        id: issue-iam-token
+        uses: yc-actions/yc-iam-token@v1
+        with:
+          yc-key-id: ${{ secrets.YC_KEY_ID }}
+          yc-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
+          yc-private-key: ${{ secrets.YC_KEY_PRIVATE }}
       
       - name: Terraform Plan
+        env:
+          TF_VAR_yandex_provider: '{"token":"${{ steps.issue-iam-token.outputs.token }}","zone":"${{ secrets.YC_ZONE }}","folder_id":"${{ secrets.YC_FOLDER_ID }}","cloud_id":"${{ secrets.YC_CLOUD_ID }}"}'
         working-directory: ${{ env.K8S_DIR }}
         run: |
           terraform plan 
