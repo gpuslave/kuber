@@ -1,7 +1,11 @@
 name: Plan Terraform k8s Cluster
 
 on:
-  workflow_dispatch 
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
 
 env:
   K8S_DIR: "./k8s-cluster"
