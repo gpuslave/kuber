@@ -1,7 +1,7 @@
 name: Apply Terraform k8s Cluster
 
 on:
-  workflow_dispatch 
+  workflow_dispatch:
 
 env:
   K8S_DIR: "./k8s-cluster"
