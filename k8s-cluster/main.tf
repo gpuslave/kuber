@@ -55,6 +55,8 @@ module "k8s-cluster" {
 
   kuber_version = var.kuber_version
 
+  cluster_name = "gpuslave-cluster"
+
   vpc = {
     network_id        = module.yc-vpc.network_id
     subnet_id         = module.yc-vpc.subnet_id
@@ -62,31 +64,71 @@ module "k8s-cluster" {
     security_group_id = module.yc-vpc.security_group_id
   }
 
-  kuber_instance_template = {
-    platform_id = "standard-v3"
+  node_groups = {
+    # General purpose node group
+    default = {
+      name        = "default-pool"
+      description = "General purpose node group"
+      platform_id = "standard-v3"
 
-    network_interface = {
-      nat                = true
-      subnet_ids         = [module.yc-vpc.subnet_id]
-      security_group_ids = [module.yc-vpc.security_group_id]
-    }
+      network_interface = {
+        nat                = false
+        subnet_ids         = [module.yc-vpc.subnet_id]
+        security_group_ids = [module.yc-vpc.security_group_id]
+      }
 
-    resources = {
-      memory = 4
-      cores  = 2
-    }
+      resources = {
+        memory = 4
+        cores  = 2
+      }
 
-    boot_disk = {
-      type = "network-ssd"
-      size = 96
-    }
+      boot_disk = {
+        type = "network-ssd"
+        size = 64
+      }
 
-    scheduling_policy = {
-      preemptible = false
-    }
+      scheduling_policy = {
+        preemptible = false
+      }
 
-    container_runtime = {
-      type = "containerd"
+      # scale_policy = {
+      #   fixed_scale = {
+      #     size = 1
+      #   }
+      # }
     }
+    # ,
+    # High memory node group
+    # memory_optimized = {
+    #   name        = "memory-pool"
+    #   description = "Memory optimized node group"
+    #   platform_id = "standard-v3"
+
+    #   network_interface = {
+    #     nat                = false
+    #     subnet_ids         = [module.yc-vpc.subnet_id]
+    #     security_group_ids = [module.yc-vpc.security_group_id]
+    #   }
+
+    #   resources = {
+    #     memory = 8
+    #     cores  = 2
+    #   }
+
+    #   boot_disk = {
+    #     type = "network-ssd"
+    #     size = 64
+    #   }
+
+    #   scheduling_policy = {
+    #     preemptible = false
+    #   }
+
+      # scale_policy = {
+      #   fixed_scale = {
+      #     size = 1
+      #   }
+      # }
+    # }
   }
 }

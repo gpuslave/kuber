@@ -17,6 +17,7 @@ variable "service_accounts" {
     })
   })
   sensitive = true
+
   default = {
     kuber = {
       node_acc     = "aje4lqc4ndk2neqaqbuk"
@@ -30,6 +31,7 @@ variable "kuber_ip_range" {
     cluster_range = string
     service_range = string
   })
+
   default = {
     cluster_range = "10.1.0.0/16"
     service_range = "10.2.0.0/16"

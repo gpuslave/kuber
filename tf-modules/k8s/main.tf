@@ -10,8 +10,8 @@ terraform {
 }
 
 resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
-  name        = "gpuslave-cluster"
-  description = "k8s for testing"
+  name        = var.cluster_name
+  description = "test K8S"
 
   network_id = var.vpc.network_id
 
@@ -22,7 +22,7 @@ resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
       subnet_id = var.vpc.subnet_id
     }
 
-    public_ip = true
+    public_ip = false
 
     security_group_ids = [var.vpc.security_group_id]
 
@@ -51,43 +51,98 @@ resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
   release_channel = "STABLE"
 }
 
-resource "yandex_kubernetes_node_group" "my-node-group" {
+# resource "yandex_kubernetes_node_group" "my-node-group" {
+#   cluster_id  = yandex_kubernetes_cluster.my-zonal-cluster.id
+#   name        = "new-cluster"
+#   description = "test node group"
+#   version     = var.kuber_version
+
+#   instance_template {
+#     platform_id = var.kuber_instance_template.platform_id
+
+#     network_interface {
+#       nat                = var.kuber_instance_template.network_interface.nat
+#       subnet_ids         = var.kuber_instance_template.network_interface.subnet_ids
+#       security_group_ids = var.kuber_instance_template.network_interface.security_group_ids
+#     }
+
+#     resources {
+#       memory = var.kuber_instance_template.resources.memory
+#       cores  = var.kuber_instance_template.resources.cores
+#     }
+
+#     boot_disk {
+#       type = var.kuber_instance_template.boot_disk.type
+#       size = var.kuber_instance_template.boot_disk.size
+#     }
+
+#     scheduling_policy {
+#       preemptible = var.kuber_instance_template.scheduling_policy.preemptible
+#     }
+
+#     container_runtime {
+#       type = var.kuber_instance_template.container_runtime.type
+#     }
+#   }
+
+#   scale_policy {
+#     fixed_scale {
+#       size = 1
+#     }
+#   }
+
+#   maintenance_policy {
+#     auto_repair  = true
+#     auto_upgrade = true
+#   }
+
+#   allocation_policy {
+#     location {
+#       zone = var.yandex_provider.zone
+#     }
+#   }
+
+# }
+
+resource "yandex_kubernetes_node_group" "node_groups" {
+  for_each = var.node_groups
+
   cluster_id  = yandex_kubernetes_cluster.my-zonal-cluster.id
-  name        = "new-cluster"
-  description = "test node group"
-  version     = var.kuber_version
+  name        = each.value.name
+  description = each.value.description
+  version     = each.value.version != null ? each.value.version : var.kuber_version
 
   instance_template {
-    platform_id = var.kuber_instance_template.platform_id
+    platform_id = each.value.platform_id
 
     network_interface {
-      nat                = var.kuber_instance_template.network_interface.nat
-      subnet_ids         = var.kuber_instance_template.network_interface.subnet_ids
-      security_group_ids = var.kuber_instance_template.network_interface.security_group_ids
+      nat                = each.value.network_interface.nat
+      subnet_ids         = each.value.network_interface.subnet_ids
+      security_group_ids = each.value.network_interface.security_group_ids
     }
 
     resources {
-      memory = var.kuber_instance_template.resources.memory
-      cores  = var.kuber_instance_template.resources.cores
+      memory = each.value.resources.memory
+      cores  = each.value.resources.cores
     }
 
     boot_disk {
-      type = var.kuber_instance_template.boot_disk.type
-      size = var.kuber_instance_template.boot_disk.size
+      type = each.value.boot_disk.type
+      size = each.value.boot_disk.size
     }
 
     scheduling_policy {
-      preemptible = var.kuber_instance_template.scheduling_policy.preemptible
+      preemptible = each.value.scheduling_policy.preemptible
     }
 
     container_runtime {
-      type = var.kuber_instance_template.container_runtime.type
+      type = "containerd"
     }
   }
 
   scale_policy {
     fixed_scale {
-      size = 1
+      size = each.value.scale_policy.fixed_scale.size
     }
   }
 
@@ -98,8 +153,7 @@ resource "yandex_kubernetes_node_group" "my-node-group" {
 
   allocation_policy {
     location {
-      zone = var.yandex_provider.zone
+      zone = var.vpc.subnet_zone
     }
   }
-
 }

@@ -5,7 +5,7 @@ variable "yandex_provider" {
     folder_id = string
     cloud_id  = string
   })
-  description = "YC"
+  description = "YC config"
 }
 
 variable "kuber_service_accounts" {
@@ -23,7 +23,13 @@ variable "kuber_ip_range" {
 }
 
 variable "kuber_version" {
-  type = string
+  type    = string
+  default = "1.28"
+}
+
+variable "cluster_name" {
+  type    = string
+  default = "default-cluster-name"
 }
 
 variable "vpc" {
@@ -35,8 +41,44 @@ variable "vpc" {
   })
 }
 
-variable "kuber_instance_template" {
-  type = object({
+# variable "kuber_instance_template" {
+#   type = object({
+#     platform_id = string
+
+#     network_interface = object({
+#       nat                = bool
+#       subnet_ids         = list(string)
+#       security_group_ids = list(string)
+#     })
+
+#     resources = object({
+#       memory = number
+#       cores  = number
+#     })
+
+#     boot_disk = object({
+#       type = string
+#       size = number
+#     })
+
+#     scheduling_policy = object({
+#       preemptible = bool
+#     })
+
+#     container_runtime = object({
+#       type = string
+#     })
+#   })
+# }
+
+variable "node_groups" {
+  description = "Map of node group configurations"
+
+  type = map(object({
+    name        = string
+    description = optional(string, "Managed node group")
+    version     = optional(string) # Defaults to kuber_version if not specified
+
     platform_id = string
 
     network_interface = object({
@@ -46,21 +88,24 @@ variable "kuber_instance_template" {
     })
 
     resources = object({
-      memory = number
-      cores  = number
+      memory = optional(number, 4)
+      cores  = optional(number, 2)
     })
 
     boot_disk = object({
-      type = string
-      size = number
+      type = optional(string, "network-ssd")
+      size = optional(number, "64")
     })
 
     scheduling_policy = object({
-      preemptible = bool
+      preemptible = optional(bool, false)
     })
 
-    container_runtime = object({
-      type = string
-    })
-  })
+    scale_policy = optional(object({
+          fixed_scale = object({
+            size = optional(number, 1)
+          })
+        }), 
+        { fixed_scale = { size = 1 } })
+  }))
 }
