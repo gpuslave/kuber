@@ -136,6 +136,13 @@ module "k8s-cluster" {
   }
 }
 
+
+#
+# NOTE: bastion segment is under development
+# 
+# TODO: add Nat gateway with routing table for node groups to access public
+# registries
+#
 resource "yandex_vpc_network" "bastion-external-network" {
   name = "bastion-external-network"
 }

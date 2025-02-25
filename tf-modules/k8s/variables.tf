@@ -6,7 +6,7 @@ variable "yandex_provider" {
     cloud_id  = string
   })
   description = "YC config"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "kuber_service_accounts" {
@@ -111,10 +111,10 @@ variable "node_groups" {
     })
 
     scale_policy = optional(object({
-          fixed_scale = object({
-            size = optional(number, 1)
-          })
-        }), 
-        { fixed_scale = { size = 1 } })
+      fixed_scale = object({
+        size = optional(number, 1)
+      })
+      }),
+    { fixed_scale = { size = 1 } })
   }))
 }
