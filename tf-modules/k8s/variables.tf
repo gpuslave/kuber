@@ -6,6 +6,7 @@ variable "yandex_provider" {
     cloud_id  = string
   })
   description = "YC config"
+  sensitive = true
 }
 
 variable "kuber_service_accounts" {
@@ -13,12 +14,14 @@ variable "kuber_service_accounts" {
     resource_acc = string
     node_acc     = string
   })
+  sensitive = true
 }
 
 variable "kuber_ip_range" {
   type = object({
     cluster_range = string
     service_range = string
+    # master_internal_ip = string
   })
 }
 
@@ -99,6 +102,12 @@ variable "node_groups" {
 
     scheduling_policy = object({
       preemptible = optional(bool, false)
+    })
+
+    allocation_policy = object({
+      location = object({
+        zone = string
+      })
     })
 
     scale_policy = optional(object({

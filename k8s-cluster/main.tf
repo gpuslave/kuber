@@ -91,6 +91,8 @@ module "k8s-cluster" {
         preemptible = false
       }
 
+      allocation_policy = { location = { zone = module.yc-vpc.subnet_zone } }
+
       # scale_policy = {
       #   fixed_scale = {
       #     size = 1
@@ -124,11 +126,78 @@ module "k8s-cluster" {
     #     preemptible = false
     #   }
 
-      # scale_policy = {
-      #   fixed_scale = {
-      #     size = 1
-      #   }
-      # }
+    # scale_policy = {
+    #   fixed_scale = {
+    #     size = 1
+    #   }
     # }
+    # allocation_policy = { location = { zone = module.yc-vpc.subnet_zone } }
+    # }
+  }
+}
+
+resource "yandex_vpc_network" "bastion-external-network" {
+  name = "bastion-external-network"
+}
+
+resource "yandex_vpc_subnet" "bastion-external-subnet" {
+  network_id = yandex_vpc_network.bastion-external-network.id
+  name       = "bastion-external-subnet"
+
+  v4_cidr_blocks = ["192.168.11.0/28"]
+}
+
+resource "yandex_vpc_security_group" "bastion-external-sg" {
+  name       = "bastion-external-security-group"
+  network_id = yandex_vpc_network.bastion-external-network.id
+
+  ingress {
+    protocol       = "TCP"
+    port           = "22"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+}
+
+resource "yandex_compute_disk" "bastion-disk" {
+  name     = "bastion-boot-disk"
+  type     = "network-hdd"
+  size     = var.vm_resources["vm-bastion"].disk
+  image_id = var.images.ubuntu_2204_bastion
+  zone     = module.yc-vpc.subnet_zone
+}
+
+resource "yandex_compute_instance" "bastion-kuber" {
+  name        = "bastion-for-kuber"
+  zone        = module.yc-vpc.subnet_zone
+  platform_id = "standard-v3"
+
+  resources {
+    cores  = var.vm_resources["vm-bastion"].cores
+    memory = var.vm_resources["vm-bastion"].memory
+  }
+
+  boot_disk {
+    disk_id = yandex_compute_disk.bastion-disk.id
+  }
+
+  network_interface {
+    subnet_id          = yandex_vpc_subnet.bastion-external-subnet.id
+    index              = 0
+    nat                = true
+    nat_ip_address     = var.bastion-ips.external
+    security_group_ids = [yandex_vpc_security_group.bastion-external-sg.id]
+  }
+
+  network_interface {
+    subnet_id          = module.yc-vpc.subnet_id
+    index              = 1
+    ipv4               = true
+    ip_address         = var.bastion-ips.internal
+    security_group_ids = [module.yc-vpc.security_group_id]
+  }
+
+  metadata = {
+    user-data = "${file("./cloud-init/bastion.yaml")}"
   }
 }

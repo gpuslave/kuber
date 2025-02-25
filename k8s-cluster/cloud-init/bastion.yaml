@@ -1,0 +1,7 @@
+#cloud-config
+users:
+- name: ubuntu
+  sudo: 'ALL=(ALL) NOPASSWD:ALL'
+  shell: /bin/bash
+  ssh-authorized-keys:
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCOMEPyVRcix6K9ZcJcQ+Lr5ScVG9/o7bLurlOXt2S4jZuXSgrVwmuor6gjNEJy7hLePMH7i6ObBIYmQdXhPvwvqVgRKoycqmYy7IXvHPNpIwGbDKwiDVrWhgif8P8i3ywDDY27FHBYvzRtT54BcFPaBaUG9iX7qK5Rk0zr4veH63WTRGRjHn972SMfA+pg2ArEyAsKvJ+A9oSuXClayqiCA8sCWHKcyg8kqRfEFWsvzN/MQLk6LZspZYCqJ9s+cwsBmYboLIOd2BiNWBpL/I1TLdBOmcO2f6AqrroYBhJxV7xpHCJh7UnQU/F+85GU/ztL8fQoeuYnu4mfIOfIAHt gpuslave@batman.local'

@@ -24,6 +24,10 @@ resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
 
     public_ip = false
 
+    # NOTE: how to know this everytime? 
+    # yc managed-kubernetes cluster list # provides master internal IP
+    # internal_v4_address = var.kuber_ip_range.master_internal_ip
+
     security_group_ids = [var.vpc.security_group_id]
 
 
@@ -42,6 +46,7 @@ resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
     }
   }
 
+  # NOTE: improve or stick to defaults?
   # cluster_ipv4_range = var.kuber_ip_range.cluster_range
   # service_ipv4_range = var.kuber_ip_range.service_range
 
@@ -51,58 +56,6 @@ resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
   release_channel = "STABLE"
 }
 
-# resource "yandex_kubernetes_node_group" "my-node-group" {
-#   cluster_id  = yandex_kubernetes_cluster.my-zonal-cluster.id
-#   name        = "new-cluster"
-#   description = "test node group"
-#   version     = var.kuber_version
-
-#   instance_template {
-#     platform_id = var.kuber_instance_template.platform_id
-
-#     network_interface {
-#       nat                = var.kuber_instance_template.network_interface.nat
-#       subnet_ids         = var.kuber_instance_template.network_interface.subnet_ids
-#       security_group_ids = var.kuber_instance_template.network_interface.security_group_ids
-#     }
-
-#     resources {
-#       memory = var.kuber_instance_template.resources.memory
-#       cores  = var.kuber_instance_template.resources.cores
-#     }
-
-#     boot_disk {
-#       type = var.kuber_instance_template.boot_disk.type
-#       size = var.kuber_instance_template.boot_disk.size
-#     }
-
-#     scheduling_policy {
-#       preemptible = var.kuber_instance_template.scheduling_policy.preemptible
-#     }
-
-#     container_runtime {
-#       type = var.kuber_instance_template.container_runtime.type
-#     }
-#   }
-
-#   scale_policy {
-#     fixed_scale {
-#       size = 1
-#     }
-#   }
-
-#   maintenance_policy {
-#     auto_repair  = true
-#     auto_upgrade = true
-#   }
-
-#   allocation_policy {
-#     location {
-#       zone = var.yandex_provider.zone
-#     }
-#   }
-
-# }
 
 resource "yandex_kubernetes_node_group" "node_groups" {
   for_each = var.node_groups
