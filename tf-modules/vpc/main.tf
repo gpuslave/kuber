@@ -38,4 +38,5 @@ resource "yandex_vpc_subnet" "kuber-subnet" {
   zone           = var.yandex_provider.zone
   network_id     = yandex_vpc_network.kuber-vpc.id
   v4_cidr_blocks = [var.cidr_blocks.subnet]
+  route_table_id = var.route_table_id
 }

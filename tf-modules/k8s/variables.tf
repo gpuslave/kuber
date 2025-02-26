@@ -21,6 +21,7 @@ variable "kuber_ip_range" {
   type = object({
     cluster_range = string
     service_range = string
+    node_mask     = number
     # master_internal_ip = string
   })
 }

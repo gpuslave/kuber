@@ -15,3 +15,7 @@ variable "cidr_blocks" {
     cluster_egress  = string
   })
 }
+
+variable "route_table_id" {
+  type = string 
+}

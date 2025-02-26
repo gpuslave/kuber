@@ -42,6 +42,8 @@ module "yc-vpc" {
     cluster_ingress = "0.0.0.0/0"
     subnet          = "192.168.10.0/24"
   }
+
+  route_table_id = yandex_vpc_route_table.kuber-nat-route-table.id
 }
 
 module "k8s-cluster" {
@@ -164,6 +166,13 @@ resource "yandex_vpc_security_group" "bastion-external-sg" {
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
+  egress {
+    protocol = "ANY"
+    from_port = 0
+    to_port = 65535
+    v4_cidr_blocks = [ "0.0.0.0/0" ]
+  }
+
 }
 
 resource "yandex_compute_disk" "bastion-disk" {
@@ -206,5 +215,21 @@ resource "yandex_compute_instance" "bastion-kuber" {
 
   metadata = {
     user-data = "${file("./cloud-init/bastion.yaml")}"
+  }
+}
+
+resource "yandex_vpc_gateway" "kuber-nat-gateway" {
+  name = "kuber-egress-gateway"
+  shared_egress_gateway {}
+}
+
+resource "yandex_vpc_route_table" "kuber-nat-route-table" {
+  name       = "kuber-route-table"
+  network_id = module.yc-vpc.network_id
+
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    # gateway_id = yandex_vpc_gateway.kuber-nat-gateway.id
+    next_hop_address = var.bastion-ips.internal
   }
 }

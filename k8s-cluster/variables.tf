@@ -30,13 +30,14 @@ variable "kuber_ip_range" {
   type = object({
     cluster_range = string
     service_range = string
+    node_mask     = number
     # master_internal_ip = string
   })
 
   default = {
-    cluster_range = "10.1.0.0/16"
-    service_range = "10.2.0.0/16"
-    # master_internal_ip = "192.168.10.18"
+    cluster_range = "10.244.0.0/16"
+    service_range = "10.96.0.0/16"
+    node_mask     = 24
   }
 }
 
