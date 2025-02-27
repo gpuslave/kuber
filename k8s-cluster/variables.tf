@@ -79,11 +79,13 @@ variable "bastion-ips" {
   type = object({
     internal = string
     external = string
+    subnet   = string
   })
   description = "bastion external reserved ip"
 
   default = {
     internal = "192.168.10.250"
     external = "158.160.170.196"
+    subnet   = "192.168.11.0/28"
   }
 }

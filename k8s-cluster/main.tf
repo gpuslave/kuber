@@ -32,8 +32,7 @@ provider "yandex" {
 }
 
 module "yc-vpc" {
-  source = "../tf-modules/vpc"
-
+  source          = "../tf-modules/vpc"
   yandex_provider = var.yandex_provider
 
   # TODO: make proper ing/eg with encapsulation
@@ -43,12 +42,23 @@ module "yc-vpc" {
     subnet          = "192.168.10.0/24"
   }
 
-  route_table_id = yandex_vpc_route_table.kuber-nat-route-table.id
+  route_table_id = module.bastion-route-table.route_table_id
+}
+
+module "bastion-route-table" {
+  source          = "../tf-modules/bastion-routing"
+  yandex_provider = var.yandex_provider
+
+  rt_name    = "bastion-rt"
+  network_id = module.yc-vpc.network_id
+  static_routes = [{
+    destination_prefix = "0.0.0.0/0"
+    next_hop_address   = var.bastion-ips.internal
+  }]
 }
 
 module "k8s-cluster" {
-  source = "../tf-modules/k8s"
-
+  source          = "../tf-modules/k8s"
   yandex_provider = var.yandex_provider
 
   kuber_service_accounts = var.service_accounts.kuber
@@ -138,98 +148,41 @@ module "k8s-cluster" {
   }
 }
 
+module "bastion" {
+  source          = "../tf-modules/bastion"
+  yandex_provider = var.yandex_provider
 
-#
-# NOTE: bastion segment is under development
-# 
-# TODO: add Nat gateway with routing table for node groups to access public
-# registries
-#
-resource "yandex_vpc_network" "bastion-external-network" {
-  name = "bastion-external-network"
-}
+  external_vpc = {
+    network_name = "bastion-external-network"
 
-resource "yandex_vpc_subnet" "bastion-external-subnet" {
-  network_id = yandex_vpc_network.bastion-external-network.id
-  name       = "bastion-external-subnet"
+    subnet = {
+      name       = "bastion-external-subnet"
+      cidr       = var.bastion-ips.subnet
+      bastion_ip = var.bastion-ips.external
+    }
 
-  v4_cidr_blocks = ["192.168.11.0/28"]
-}
-
-resource "yandex_vpc_security_group" "bastion-external-sg" {
-  name       = "bastion-external-security-group"
-  network_id = yandex_vpc_network.bastion-external-network.id
-
-  ingress {
-    protocol       = "TCP"
-    port           = "22"
-    v4_cidr_blocks = ["0.0.0.0/0"]
+    sg = {
+      name = "bastion-external-sg"
+    }
   }
 
-  egress {
-    protocol = "ANY"
-    from_port = 0
-    to_port = 65535
-    v4_cidr_blocks = [ "0.0.0.0/0" ]
+  internal_vpc = {
+    bastion_ip = var.bastion-ips.internal
+    subnet_id  = module.yc-vpc.subnet_id
+    sg_id      = module.yc-vpc.security_group_id
+    network_id = module.yc-vpc.network_id
   }
 
-}
+  resources = {
+    vm = {
+      name = "bastion-host"
+    }
 
-resource "yandex_compute_disk" "bastion-disk" {
-  name     = "bastion-boot-disk"
-  type     = "network-hdd"
-  size     = var.vm_resources["vm-bastion"].disk
-  image_id = var.images.ubuntu_2204_bastion
-  zone     = module.yc-vpc.subnet_zone
-}
-
-resource "yandex_compute_instance" "bastion-kuber" {
-  name        = "bastion-for-kuber"
-  zone        = module.yc-vpc.subnet_zone
-  platform_id = "standard-v3"
-
-  resources {
-    cores  = var.vm_resources["vm-bastion"].cores
-    memory = var.vm_resources["vm-bastion"].memory
+    disk = {
+      name = "bastion-disk"
+      size = 64
+    }
   }
 
-  boot_disk {
-    disk_id = yandex_compute_disk.bastion-disk.id
-  }
-
-  network_interface {
-    subnet_id          = yandex_vpc_subnet.bastion-external-subnet.id
-    index              = 0
-    nat                = true
-    nat_ip_address     = var.bastion-ips.external
-    security_group_ids = [yandex_vpc_security_group.bastion-external-sg.id]
-  }
-
-  network_interface {
-    subnet_id          = module.yc-vpc.subnet_id
-    index              = 1
-    ipv4               = true
-    ip_address         = var.bastion-ips.internal
-    security_group_ids = [module.yc-vpc.security_group_id]
-  }
-
-  metadata = {
-    user-data = "${file("./cloud-init/bastion.yaml")}"
-  }
-}
-
-resource "yandex_vpc_gateway" "kuber-nat-gateway" {
-  name = "kuber-egress-gateway"
-  shared_egress_gateway {}
-}
-
-resource "yandex_vpc_route_table" "kuber-nat-route-table" {
-  name       = "kuber-route-table"
-  network_id = module.yc-vpc.network_id
-
-  static_route {
-    destination_prefix = "0.0.0.0/0"
-    # gateway_id = yandex_vpc_gateway.kuber-nat-gateway.id
-    next_hop_address = var.bastion-ips.internal
-  }
+  cloud_init = file("./cloud-init/bastion.yaml")
 }

@@ -6,6 +6,7 @@ variable "yandex_provider" {
     cloud_id  = string
   })
   description = "YC"
+  sensitive   = true
 }
 
 variable "cidr_blocks" {
@@ -17,5 +18,5 @@ variable "cidr_blocks" {
 }
 
 variable "route_table_id" {
-  type = string 
+  type = string
 }

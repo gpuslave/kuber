@@ -51,8 +51,8 @@ resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
 
   # network_policy_provider = "CALICO"
 
-  network_implementation { 
-    cilium {} 
+  network_implementation {
+    cilium {}
   }
 
   service_account_id      = var.kuber_service_accounts.resource_acc
