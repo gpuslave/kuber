@@ -2,11 +2,11 @@ terraform {
   required_providers {
     yandex = {
       source  = "yandex-cloud/yandex"
-      version = "0.135.0"
+      version = ">=0.136.0"
     }
   }
 
-  required_version = "~>1.10.5"
+  required_version = ">1.10.5"
 }
 
 resource "yandex_kubernetes_cluster" "my-zonal-cluster" {
